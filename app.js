@@ -69,7 +69,7 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 var LocationModule = require('./models/location');
-LocationModule.init();
+LocationModule._init();
 
 var debug = require('debug')('gpslogger');
 app.set('port', process.env.PORT || 8005);
