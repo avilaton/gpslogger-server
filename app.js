@@ -5,19 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-
 var exphbs  = require('express3-handlebars');
 
 var hbs = exphbs.create({
-    // Specify helpers which are only registered on this instance.
-    helpers: {
-        foo: function () { return 'FOO!'; },
-        bar: function () { return 'BAR!'; }
-    }
+    helpers: {}
 });
-
-
-
 
 var routes = require('./routes/index');
 var log = require('./routes/log');
