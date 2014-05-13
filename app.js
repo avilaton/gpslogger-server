@@ -68,9 +68,8 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
-var LocationModule = require('./models/location');
-LocationModule._init();
-console.info("db successfully initialized");
+var LocationModel = require('./models/location');
+LocationModel.create();
 
 var debug = require('debug')('gpslogger');
 app.set('port', process.env.PORT || 8005);

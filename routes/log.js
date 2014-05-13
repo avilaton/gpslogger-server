@@ -8,7 +8,7 @@ router.get('/log', function(req, res) {
   LocationModel.insert({
   	lat: req.query.lat, 
   	lon: req.query.lon,
-  	timestamp:req.query.time
+  	time: req.query.time
   });
   res.send(200, 'ok');
 });

@@ -4,63 +4,44 @@ db = new sqlite3.Database('db.sqlite'),
 LOCATION = {};
 
 //elimina y crea la tabla clientes
-LOCATION._init = function()
-{
-	db.run("DROP TABLE IF EXISTS locations");
-	db.run("CREATE TABLE IF NOT EXISTS locations (id INTEGER PRIMARY KEY AUTOINCREMENT, lat TEXT, lon TEXT, timestamp TEXT)");
-	console.log("Successfully created table locations");
+LOCATION.create = function () {
+    db.run("CREATE TABLE IF NOT EXISTS locations (id INTEGER PRIMARY KEY AUTOINCREMENT, lat TEXT, lon TEXT, timestamp TEXT)");
+    console.log("Successfully created table locations");
 }
 
-//inserta un nuevo usuario en la tabla clientes
-LOCATION.insert = function(location)
-{
+LOCATION.drop = function () {
+	db.run("DROP TABLE IF EXISTS locations");
+}
+
+LOCATION.insert = function(location) {
 	var stmt = db.prepare("INSERT INTO locations VALUES (?,?,?,?)");
-	stmt.run(null,location.lat,location.lon, location.timestamp);
+	stmt.run(null, location.lat, location.lon, location.time);
 	stmt.finalize();
 }
 
-//obtenemos todos los clientes de la tabla clientes
-//con db.all obtenemos un array de objetos, es decir todos
-LOCATION.all = function(callback)
-{
+LOCATION.all = function(callback) {
 	db.all("SELECT * FROM locations", function(err, rows) {
-		if(err)
-		{
+		if(err) {
 			throw err;
-		}
-		else
-		{
+		} else {
 			callback(null, rows);
 		}
 	});
 }
 
-//obtenemos un usuario por su id, en este caso hacemos uso de db.get
-//ya que sólo queremos una fila
-LOCATION.get = function(userId,callback)
-{
-	stmt = db.prepare("SELECT * FROM clientes WHERE id = ?");
-	//pasamos el id del cliente a la consulta
-    stmt.bind(userId); 
-    stmt.get(function(error, row)
-    {
-    	if(error) 
-        {
+LOCATION.get = function(userId,callback) {
+	stmt = db.prepare("SELECT * FROM locations");
+    stmt.get(function (error, row) {
+    	if(error) {
             throw err;
-        } 
-        else 
-        {
-        	//retornamos la fila con los datos del usuario
-            if(row) 
-            {
+        } else {
+            if(row) {
                 callback("", row);
-            }
-            else
-            {
-            	console.log("El usuario no existe");
+            } else {
+            	console.log("No locations found");
             }
         }
     });
 }
-//exportamos el modelo para poder utilizarlo con require
+
 module.exports = LOCATION;
