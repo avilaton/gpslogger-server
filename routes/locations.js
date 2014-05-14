@@ -21,7 +21,7 @@ router.get('/locations', function(req, res) {
 	        ]
 	      },
 	      "properties": {
-	        "time": rows[i].timestamp
+	        "time": rows[i].time
 	      }
 	    })
   	};

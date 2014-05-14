@@ -1,47 +1,50 @@
-//creamos la base de datos tienda y el objeto LOCATION donde iremos almacenando la info
-var sqlite3 = require('sqlite3').verbose(),
-db = new sqlite3.Database('db.sqlite'),
+var anyDB = require('any-db');
+// var conn = anyDB.createConnection('sqlite3://db.sqlite');
+var conn = anyDB.createConnection(process.env.DATABASE_URL || 'postgres://gavila:guest@localhost:5432/gpslogger');
+
 LOCATION = {};
 
-//elimina y crea la tabla clientes
-LOCATION.create = function () {
-    db.run("CREATE TABLE IF NOT EXISTS locations (id INTEGER PRIMARY KEY AUTOINCREMENT, lat TEXT, lon TEXT, timestamp TEXT)");
-    console.log("Successfully created table locations");
+LOCATION.create = function (callback) {
+    var sql = "CREATE TABLE IF NOT EXISTS locations (id SERIAL NOT NULL PRIMARY KEY, lat TEXT, lon TEXT, time TEXT)";
+    conn.query(sql, function (error, result) {
+        if (!error) {
+            console.log("Successfully created table locations");
+            callback(null, result);
+        } else {
+            console.error(error);
+        };
+    });
 }
 
 LOCATION.drop = function () {
-	db.run("DROP TABLE IF EXISTS locations");
+    conn.query("DROP TABLE IF EXISTS locations");
 }
 
 LOCATION.insert = function(location) {
-	var stmt = db.prepare("INSERT INTO locations VALUES (?,?,?,?)");
-	stmt.run(null, location.lat, location.lon, location.time);
-	stmt.finalize();
+    var values = [location.lat, location.lon, location.time];
+    var query = conn.query("INSERT INTO locations(lat, lon, time) VALUES ($1,$2,$3)", values);
+    // var query = conn.query("INSERT INTO locations VALUES (?,?,?,?)", values);
+    query.on('end', function () {
+        console.log('done inserting!');
+    });
 }
 
 LOCATION.all = function(callback) {
-	db.all("SELECT * FROM locations", function(err, rows) {
-		if(err) {
-			throw err;
-		} else {
-			callback(null, rows);
-		}
-	});
-}
+    var fields, rows = [];
 
-LOCATION.get = function(userId,callback) {
-	stmt = db.prepare("SELECT * FROM locations");
-    stmt.get(function (error, row) {
-    	if(error) {
-            throw err;
-        } else {
-            if(row) {
-                callback("", row);
-            } else {
-            	console.log("No locations found");
-            }
-        }
-    });
+    conn.query("SELECT * FROM locations")
+        .on('error', function (error) {
+            throw error;
+        })
+        .on('fields', function (_fields) {
+            fields = _fields;
+        })
+        .on('data', function (row) {
+            rows.push(row);
+        })
+        .on('end', function () {
+            callback(null, rows);
+        });
 }
 
 module.exports = LOCATION;
